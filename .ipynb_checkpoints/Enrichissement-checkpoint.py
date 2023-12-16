@@ -227,8 +227,35 @@ def ajout_stat_trans(dvf, df_transport):
     return dvf_avec_transport
 
 
+"""
+3) Ajout lycées
+"""
 
+def ajout_meilleurs_lycées(dvf, df_lycees):
 
+    #sélection des variables
+    var_lycees = ['patronyme', 'geometry']
+    df_lycees = df_lycees[var_lycees].copy()
+    
+    #Passer en projection 2D
+    proj_lambert = 'EPSG:3942'
+    dvf = dvf.to_crs(proj_lambert)
+    df_lycees = df_lycees.to_crs(proj_lambert)
+
+    #jointure spatiale
+    merged_nearest = gpd.sjoin_nearest(dvf, df_lycees, how="left", max_distance=5000, distance_col="dist_min_lycee")
+
+    #dist en km
+    merged_nearest['dist_min_lycee'] = merged_nearest['dist_min_lycee']/1000
+
+    #repasser en système de projection wgs 84
+    dvf_avec_lycees = merged_nearest.to_crs('EPSG:4326')
+
+    #supprimer et renommer colonnes
+    dvf_avec_lycees = dvf_avec_lycees.drop(['index_right'], axis=1)    
+    dvf_avec_lycees = dvf_avec_lycees.rename(columns={'patronyme': 'nom_lycee'})
+
+    return dvf_avec_lycees
 
 
 
