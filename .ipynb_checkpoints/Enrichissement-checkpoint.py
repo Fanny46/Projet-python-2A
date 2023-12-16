@@ -257,5 +257,74 @@ def ajout_meilleurs_lycées(dvf, df_lycees):
 
     return dvf_avec_lycees
 
+"""
+4) Ajout Sites historiques/touristiques
+"""
+
+"""Fonction qui merge les data set en trouvant le site historique (point) le plus proche 
+et enregistre la distance (en km)"""
+
+def ajout_sites_histo(dvf, df_monuments):
+
+    #sélection des variables
+    var_monuments = ['immeuble', 'geometry']
+    df_monuments = df_monuments[var_monuments].copy()
+    
+    #Passer en projection 2D
+    proj_lambert = 'EPSG:3942'
+    dvf = dvf.to_crs(proj_lambert)
+    df_monuments = df_monuments.to_crs(proj_lambert)
+
+    #jointure spatiale
+    merged_nearest = gpd.sjoin_nearest(dvf, df_monuments, how="left", max_distance=5000, distance_col="dist_min_site_histo")
+
+    #dist en km
+    merged_nearest['dist_min_site_histo'] = merged_nearest['dist_min_site_histo']/1000
+
+    #repasser en système de projection wgs 84
+    dvf_avec_sites_histo = merged_nearest.to_crs('EPSG:4326')
+
+    #supprimer et renommer colonnes
+    dvf_avec_sites_histo = dvf_avec_sites_histo.drop(['index_right'], axis=1)    
+    dvf_avec_sites_histo = dvf_avec_sites_histo.rename(columns={'immeuble': 'nom_site_histo'})
+
+    return dvf_avec_sites_histo
+
+
+"""
+5) Ajout voies d'eau
+"""
+
+"""Fonction qui merge les data set en trouvant la voie d'eau la plus proche 
+et enregistre la distance (en km)"""
+
+def ajout_voies_eau(dvf, df_eau):
+
+    #sélection des variables
+    var_eau = ['geometry']
+    df_eau = df_eau[var_eau].copy()
+    
+    #Passer en projection 2D
+    proj_lambert = 'EPSG:3942'
+    dvf = dvf.to_crs(proj_lambert)
+    df_eau = df_eau.to_crs(proj_lambert)
+
+    #jointure spatiale
+    merged_nearest = gpd.sjoin_nearest(dvf, df_eau, how="left", max_distance=6000, distance_col="dist_min_voie_eau")
+
+    #dist en km
+    merged_nearest['dist_min_voie_eau'] = merged_nearest['dist_min_voie_eau']/1000
+
+    #repasser en système de projection wgs 84
+    dvf_avec_voie_eau = merged_nearest.to_crs('EPSG:4326')
+
+    #supprimer colonnes
+    dvf_avec_voie_eau = dvf_avec_voie_eau.drop(['index_right'], axis=1)  
+
+    #retirer les doublons
+    #dvf_avec_voie_eau = dvf_avec_voie_eau.drop_duplicates(['id_mutation', 'log_prix', 'geometry'])
+
+    return dvf_avec_voie_eau
+
 
 
