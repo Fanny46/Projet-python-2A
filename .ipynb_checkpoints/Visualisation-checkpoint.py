@@ -4,6 +4,18 @@ import numpy as np
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
+"""Données administratives géographiques de paris intra muros"""
+
+paris_arrondissement = gpd.read_file('2) Visualisation/Données_carto/paris_arrondissements.geojson')
+paris_quartiers = gpd.read_file('2) Visualisation/Données_carto/paris_quartiers.geojson')
+paris_quartiers = paris_quartiers[['c_quinsee', 'l_qu', 'geometry']]
+
+"""Changement de directory pour lire les fichiers"""
+import os
+os.getcwd() #trouver le directory actuel 
+os.chdir('/home/onyxia/work/Projet-python-2A')
+
+
 def evolution_prix_mensuel(dvf):
     #dvf : dataframe avec une colonne date_mutation et prix
     import geopandas as gpd
@@ -46,6 +58,7 @@ def evolution_prix_mensuel(dvf):
     
     # Afficher le graphique
     plt.show()
+
 
 def evolution_nombre(dvf, freq):
     #dvf : dataframe avec une colonne date_mutation et prix
@@ -108,6 +121,7 @@ def evolution_nombre(dvf, freq):
     # Afficher le graphique
     plt.show()
 
+
 def carte_prix_moyen_arrodissement(dvf):
     #dvf : geodataframe avec une colonne 'geometry'
 
@@ -166,7 +180,8 @@ def carte_prix_moyen_arrodissement(dvf):
 
     plt.show()
 
-def carte_prix_moyen_quartier_py(dvf):
+
+def carte_prix_moyen_quartier(dvf):
     
     #dvf : geodataframe avec une colonne 'geometry'
 
