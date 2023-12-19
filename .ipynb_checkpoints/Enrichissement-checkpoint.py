@@ -327,4 +327,46 @@ def ajout_voies_eau(dvf, df_eau):
     return dvf_avec_voie_eau
 
 
+"""
+5) Ajout distance centre paris
+"""
+
+"""Fonction qui merge les data set en trouvant la distance minimale au centre de Paris en km"""
+
+def ajout_centre_paris(dvf, centre_paris_gdf):
+
+    #Passer en projection 2D
+    proj_lambert = 'EPSG:3942'
+    dvf = dvf.to_crs(proj_lambert)
+    centre_paris_gdf = centre_paris_gdf.to_crs(proj_lambert)
+
+    #jointure spatiale
+    merged_nearest = gpd.sjoin_nearest(dvf, centre_paris_gdf, how="left", max_distance=6000, distance_col="dist_min_paris_centre")
+
+    #dist en km
+    merged_nearest['dist_min_paris_centre'] = merged_nearest['dist_min_paris_centre']/1000
+
+    #repasser en système de projection wgs 84
+    dvf_avec_dist_centre = merged_nearest.to_crs('EPSG:4326')
+
+    #supprimer colonnes
+    dvf_avec_dist_centre = dvf_avec_dist_centre.drop(['index_right'], axis=1)  
+
+    #retirer les doublons
+    #dvf_avec_voie_eau = dvf_avec_voie_eau.drop_duplicates(['id_mutation', 'log_prix', 'geometry'])
+
+    return dvf_avec_dist_centre
+
+
+
+
+
+
+
+
+
+
+
+
+
 
