@@ -188,10 +188,6 @@ def carte_metro():
     # Ajouter un titre
     ax.set_title('Carte des stations de métro parisiennes')
     
-    # Export du graphique avec extension .png
-    output_path = '3.0) Enrichissement données/Sorties_cartes/stations_metro_paris.png'
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0.1)
-    
     plt.show()
     
 

@@ -47,14 +47,6 @@ def evolution_prix_mensuel(dvf):
     
     # Afficher la grille
     plt.grid(True)
-
-    # Enregistrer la figure dans le dossier spécifié
-    output_folder = '2) Visualisation/Sorties_graph'
-    output_filename = 'evolution_mensuelle_prix.png'
-    output_path = os.path.join(output_folder, output_filename)
-    
-    # Enregistrer la figure
-    plt.savefig(output_path)
     
     # Afficher le graphique
     plt.show()
@@ -110,14 +102,6 @@ def evolution_nombre(dvf, freq):
     # Afficher la grille
     plt.grid(True)
 
-    # Chemin de sortie
-    output_folder = '2) Visualisation/Sorties_graph'
-    output_filename = f'evolution_{freq_titre}_nb_ventes.png'
-    output_path = os.path.join(output_folder, output_filename)
-    
-    # Enregistrer la figure
-    plt.savefig(output_path)
-
     # Afficher le graphique
     plt.show()
 
@@ -170,14 +154,6 @@ def carte_prix_moyen_arrodissement(dvf):
     # Ajuster l'espacement entre les sous-graphiques
     plt.subplots_adjust(wspace=0.2)
 
-    # Chemin de sortie
-    output_folder = '2) Visualisation/Sorties_graph'
-    output_filename = 'prix_moyen_arrondissements.png'
-    output_path = os.path.join(output_folder, output_filename)
-    
-    # Enregistrer la figure
-    plt.savefig(output_path)
-
     plt.show()
 
 
@@ -229,16 +205,5 @@ def carte_prix_moyen_quartier(dvf):
 
     # Ajustez l'espacement entre les sous-graphiques
     plt.subplots_adjust(wspace=0.2)
-
-    # Enregistrez la figure dans le dossier spécifié
-    output_folder = '2) Visualisation/Sorties_graph'
-    output_filename = 'prix_moyen_quartiers.png'
-    output_path = os.path.join(output_folder, output_filename)
-    
-    # Assurez-vous que le dossier de sortie existe
-    os.makedirs(output_folder, exist_ok=True)
-    
-    # Enregistrez la figure
-    plt.savefig(output_path)
 
     plt.show()
