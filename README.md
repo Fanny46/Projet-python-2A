@@ -10,4 +10,6 @@ La base de donnée principale qui sera utilisée, est le **fichier Demandes de V
 
 Comme toutes les ventes de ce fichier sont géolocalisées, l'enrichissement principal qui sera apporté à la base de données sera l'ajout, pour chaque appartement, de la **distance minimale à certains lieux d'intérêt parisiens** (stations de métro, espaces verts, lieux historiques, etc.).
 
-Le code du rapport final se trouve dans le notebook `RAPPORT_FIN`. A plusieurs étapes du projet, des fonctions définies dans les fichiers `Enrichissement.py` et `Visualisation.py` sont utilisées, afin de faciliter la lecture.
+Le code du rapport final se trouve dans le notebook `RAPPORT_FIN.ipynb`. A plusieurs étapes du projet, des fonctions définies dans les fichiers `Enrichissement.py` et `Visualisation.py` sont utilisées, afin de faciliter la lecture.
+
+La fonction et le contenu de chacun des dossiers présents dans ce dépôt, seront précisés dans le rapport au fur et à mesure du projet.
