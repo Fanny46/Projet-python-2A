@@ -3,17 +3,21 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+
+
+"""Changement de directory pour lire les fichiers"""
+import os
+os.getcwd() #trouver le directory actuel 
+os.chdir('/home/onyxia/work/Projet-python-2A')
+
 
 """Données administratives géographiques de paris intra muros"""
 
 paris_arrondissement = gpd.read_file('2) Visualisation/Données_carto/paris_arrondissements.geojson')
 paris_quartiers = gpd.read_file('2) Visualisation/Données_carto/paris_quartiers.geojson')
 paris_quartiers = paris_quartiers[['c_quinsee', 'l_qu', 'geometry']]
-
-"""Changement de directory pour lire les fichiers"""
-import os
-os.getcwd() #trouver le directory actuel 
-os.chdir('/home/onyxia/work/Projet-python-2A')
 
 
 def evolution_prix_mensuel(dvf):
@@ -31,25 +35,21 @@ def evolution_prix_mensuel(dvf):
     # Grouper par mois et calculer la moyenne des prix
     dvf_grouped = dvf.groupby('mois')['prix'].mean().reset_index()
     
-    # Tracer l'évolution mensuelle des prix
-    plt.figure(figsize=(8, 5))
-    plt.plot(dvf_grouped['mois'].astype(str), dvf_grouped['prix'], marker='o', linestyle='-', color='b')
+    # Tracer l'évolution mensuelle des prix avec Plotly Express
+    fig = px.line(dvf_grouped, x='mois', y='prix', markers=True, line_shape='linear', labels={'prix': 'Prix moyen (€)'}, title='Évolution mensuelle du prix moyen des appartements vendus à Paris depuis 2018')
     
-    # Diminuer la fréquence des étiquettes sur l'axe des x
-    n = len(dvf_grouped['mois'])
-    step = max(1, n // 10)  # Vous pouvez ajuster le pas selon vos besoins
-    plt.xticks(dvf_grouped.index[::step], dvf_grouped['mois'].iloc[::step], rotation=45, ha='right')
-    
-    # Ajouter des étiquettes et un titre
-    plt.xlabel('Mois')
-    plt.ylabel('Prix moyen')
-    plt.title('Évolution Mensuelle du prix moyen des appartements vendus à Paris depuis 2018')
-    
-    # Afficher la grille
-    plt.grid(True)
-    
-    # Afficher le graphique
-    plt.show()
+     # Ajouter une ligne rouge représentant la moyenne sur toute la période
+    fig.add_trace(go.Scatter(x=dvf_grouped['mois'], y=[moyenne_totale] * len(dvf_grouped),
+                             mode='lines', line=dict(dash='dash', color='red'), name='Moyenne totale'))
+
+    # Configurer l'affichage des étiquettes de l'axe 'mois'
+    fig.update_xaxes(tickangle=45, tickmode='array', tickvals=['2018-07','2019-01','2019-07','2020-01','2020-07','2021-01','2021-07','2022-01','2022-07','2023-01','2023-07'],ticktext=['2018-07','2019-01','2019-07','2020-01','2020-07','2021-01','2021-07','2022-01','2022-07','2023-01','2023-07'])
+
+    # Configurer l'affichage des valeurs au survol de la souris
+    fig.update_traces(hovertemplate='%{y:.2f}', hoverinfo='y+name')
+
+    # Afficher le graphique interactif
+    fig.show()
 
 
 def evolution_nombre(dvf, freq):
@@ -136,25 +136,49 @@ def carte_prix_moyen_arrodissement(dvf):
         dvf_geo_group_reel
     ).to_crs(2154)
 
-    # Créer une figure avec deux sous-graphiques côte à côte
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Première carte (à gauche)
-    paris_arrondissement_count_carrez.plot(ax=ax1, column="prix_au_m2_carrez", cmap="coolwarm", legend=True)
-    ax1.set_title('Prix moyen du m^2 carrez - Carte 1')
-    ax1.set_xticks([], [])
-    ax1.set_yticks([], [])
-    
-    # Deuxième carte (à droite)
-    paris_arrondissement_count_reel.plot(ax=ax2, column="prix_au_m2_reel_bati", cmap="coolwarm", legend=True)
-    ax2.set_title('Prix moyen du m^2 reel bati - Carte 2')
-    ax2.set_xticks([], [])
-    ax2.set_yticks([], [])
-    
-    # Ajuster l'espacement entre les sous-graphiques
-    plt.subplots_adjust(wspace=0.2)
+    # Créer la première carte du prix du m^2 carrez
+    fig1 = px.choropleth_mapbox(
+        paris_arrondissement_count_carrez,
+        geojson=paris_arrondissement.geometry,
+        locations=paris_arrondissement.index,
+        color="prix_au_m2_carrez",
+        color_continuous_scale="ylorbr",
+        mapbox_style="carto-positron",
+        center={"lat": 48.8566, "lon": 2.3522},
+        zoom=10.5,
+        opacity=1,
+        title="Prix moyen du m² carrez par arrondissement (en €)",
+        height=400,
+        custom_data=[paris_arrondissement.NOM, paris_arrondissement_count_carrez['prix_au_m2_carrez']]  # Ajoutez les données personnalisées ici
+    )
 
-    plt.show()
+    # Créer la deuxième carte du prix du m^2 réel
+    fig2 = px.choropleth_mapbox(
+        paris_arrondissement_count_reel,
+        geojson=paris_arrondissement.geometry,
+        locations=paris_arrondissement.index,
+        color="prix_au_m2_reel_bati",
+        color_continuous_scale="ylorbr",
+        mapbox_style="carto-positron",
+        center={"lat": 48.8566, "lon": 2.3522},
+        zoom=10.5,
+        opacity=1,
+        title="Prix moyen du m² réel par arrondissement (en €)",
+        height=400,
+        custom_data=[paris_arrondissement.NOM, paris_arrondissement_count_reel['prix_au_m2_reel_bati']]  # Ajoutez les données personnalisées ici
+      )
+
+    # Ajouter les étiquettes personnalisées pour le survol
+    fig1.update_traces(hovertemplate="%{customdata[0]}<br>Prix moyen du m² : %{customdata[1]:.0f}")
+    fig2.update_traces(hovertemplate="%{customdata[0]}<br>Prix moyen du m² : %{customdata[1]:.0f}")
+    
+    # Ajuster les marges
+    fig1.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
+    fig2.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
+
+    # Afficher les cartes interactives
+    fig1.show()
+    fig2.show()
 
 
 def carte_prix_moyen_quartier(dvf):
@@ -188,22 +212,46 @@ def carte_prix_moyen_quartier(dvf):
         dvf_geo_group_reel
     ).to_crs(2154)
 
-    # Créez une figure avec deux sous-graphiques côte à côte
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Première carte (à gauche)
-    paris_quartiers_count_carrez.plot(ax=ax1, column="prix_au_m2_carrez", cmap="coolwarm", legend=True)
-    ax1.set_title('Prix moyen du m^2 carrez - Carte 1')
-    ax1.set_xticks([], [])
-    ax1.set_yticks([], [])
-    
-    # Deuxième carte (à droite)
-    paris_quartiers_count_reel.plot(ax=ax2, column="prix_au_m2_reel_bati", cmap="coolwarm", legend=True)
-    ax2.set_title('Prix moyen du m^2 reel - Carte 2')
-    ax2.set_xticks([], [])
-    ax2.set_yticks([], [])
+    # Créer la première carte du prix du m^2 carrez
+    fig1 = px.choropleth_mapbox(
+        paris_quartiers_count_carrez,
+        geojson=paris_quartiers.geometry,
+        locations=paris_quartiers.index,
+        color="prix_au_m2_carrez",
+        color_continuous_scale="ylorbr",
+        mapbox_style="carto-positron",
+        center={"lat": 48.8566, "lon": 2.3522},
+        zoom=10.5,
+        opacity=1,
+        title="Prix moyen du m² carrez par arrondissement (en €)",
+        height=400,
+        custom_data=[paris_quartiers.NOM, paris_quartiers_count_carrez['prix_au_m2_carrez']]  # Ajoutez les données personnalisées ici
+    )
 
-    # Ajustez l'espacement entre les sous-graphiques
-    plt.subplots_adjust(wspace=0.2)
+    # Créer la deuxième carte du prix du m^2 réel
+    fig2 = px.choropleth_mapbox(
+        paris_quartiers_count_reel,
+        geojson=paris_quartiers.geometry,
+        locations=paris_quartiers.index,
+        color="prix_au_m2_reel_bati",
+        color_continuous_scale="ylorbr",
+        mapbox_style="carto-positron",
+        center={"lat": 48.8566, "lon": 2.3522},
+        zoom=10.5,
+        opacity=1,
+        title="Prix moyen du m² réel par arrondissement (en €)",
+        height=400,
+        custom_data=[paris_quartiers.NOM, paris_quartiers_count_reel['prix_au_m2_reel_bati']]  # Ajoutez les données personnalisées ici
+      )
 
-    plt.show()
+    # Ajouter les étiquettes personnalisées pour le survol
+    fig1.update_traces(hovertemplate="%{customdata[0]}<br>Prix moyen du m² : %{customdata[1]:.0f}")
+    fig2.update_traces(hovertemplate="%{customdata[0]}<br>Prix moyen du m² : %{customdata[1]:.0f}")
+    
+    # Ajuster les marges
+    fig1.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
+    fig2.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
+
+    # Afficher les cartes interactives
+    fig1.show()
+    fig2.show()
