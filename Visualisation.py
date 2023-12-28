@@ -225,7 +225,7 @@ def carte_prix_moyen_quartier(dvf):
         opacity=1,
         title="Prix moyen du m² carrez par arrondissement (en €)",
         height=400,
-        custom_data=[paris_quartiers.NOM, paris_quartiers_count_carrez['prix_au_m2_carrez']]  # Ajoutez les données personnalisées ici
+        custom_data=[paris_quartiers.l_qu, paris_quartiers_count_carrez['prix_au_m2_carrez']]  # Ajoutez les données personnalisées ici
     )
 
     # Créer la deuxième carte du prix du m^2 réel
@@ -241,7 +241,7 @@ def carte_prix_moyen_quartier(dvf):
         opacity=1,
         title="Prix moyen du m² réel par arrondissement (en €)",
         height=400,
-        custom_data=[paris_quartiers.NOM, paris_quartiers_count_reel['prix_au_m2_reel_bati']]  # Ajoutez les données personnalisées ici
+        custom_data=[paris_quartiers.l_qu, paris_quartiers_count_reel['prix_au_m2_reel_bati']]  # Ajoutez les données personnalisées ici
       )
 
     # Ajouter les étiquettes personnalisées pour le survol
