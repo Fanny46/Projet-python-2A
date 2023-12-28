@@ -76,7 +76,7 @@ def evolution_nombre(dvf, freq):
     #création d'une colonne au format date_time
     dvf['date_time'] = pd.to_datetime(dvf['date_mutation'])
 
-    # Convertir la colonne 'date_time' en format de période mensuelle
+    # Convertir la colonne 'date_time' en format de périodes mensuelles ou annuelles
     dvf[freq] = dvf['date_time'].dt.to_period(period)
     
     # Grouper par mois et calculer la moyenne des prix
@@ -84,26 +84,29 @@ def evolution_nombre(dvf, freq):
 
     # Convertir en str
     dvf_grouped[freq] = dvf_grouped[freq].astype(str)
-    
-    # Tracer l'évolution mensuelle des prix
-    plt.figure(figsize=(8, 5))
-    plt.plot(dvf_grouped[freq], dvf_grouped['nombre de ventes'], marker='o', linestyle='-', color='b')
-    
-    # Diminuer la fréquence des étiquettes sur l'axe des x
-    n = len(dvf_grouped[freq])
-    step = max(1, n // 10)  # Vous pouvez ajuster le pas selon vos besoins
-    plt.xticks(dvf_grouped.index[::step], dvf_grouped[freq].iloc[::step], rotation=45, ha='right')
-        
-    # Ajouter des étiquettes et un titre
-    plt.xlabel(freq)
-    plt.ylabel('Nombre de ventes')
-    plt.title(f"Évolution {freq_titre} du nombre de ventes d'appartements à Paris depuis 2018")
-    
-    # Afficher la grille
-    plt.grid(True)
 
-    # Afficher le graphique
-    plt.show()
+    # Calculer la moyenne sur toute la période
+    moyenne = dvf_grouped['nombre de ventes'].mean()
+
+    # Tracer l'évolution mensuelle des prix avec Plotly Express
+    fig = px.line(dvf_grouped, x=freq, y='nombre de ventes', markers=True, line_shape='linear', labels={'nombre de ventes'},
+              title=f"Évolution {freq_titre} du nombre de ventes d'appartements à Paris depuis 2018")
+    
+     # Ajouter une ligne rouge représentant la moyenne sur toute la période
+    fig.add_trace(go.Scatter(x=dvf_grouped[freq], y=[moyenne] * len(dvf_grouped),
+                             mode='lines', line=dict(dash='dash', color='red'), name='Moyenne'))
+
+    # Configurer l'affichage des étiquettes de l'axe 'mois'
+    if freq=="Mois" :
+        fig.update_xaxes(tickangle=45, tickmode='array', tickvals=['2018-07','2019-01','2019-07','2020-01','2020-07','2021-01','2021-07','2022-01','2022-07','2023-01','2023-07'],ticktext=['2018-07','2019-01','2019-07','2020-01','2020-07','2021-01','2021-07','2022-01','2022-07','2023-01','2023-07'])
+    else : pass
+
+    # Configurer l'affichage des valeurs au survol de la souris
+    fig.update_traces(hovertemplate='%{y:.0f}', hoverinfo='y+name')
+
+    # Afficher le graphique interactif
+    fig.show()
+
 
 
 def carte_prix_moyen_arrodissement(dvf):
@@ -223,7 +226,7 @@ def carte_prix_moyen_quartier(dvf):
         center={"lat": 48.8566, "lon": 2.3522},
         zoom=10.5,
         opacity=1,
-        title="Prix moyen du m² carrez par arrondissement (en €)",
+        title="Prix moyen du m² carrez par quartier (en €)",
         height=400,
         custom_data=[paris_quartiers.l_qu, paris_quartiers_count_carrez['prix_au_m2_carrez']]  # Ajoutez les données personnalisées ici
     )
@@ -239,7 +242,7 @@ def carte_prix_moyen_quartier(dvf):
         center={"lat": 48.8566, "lon": 2.3522},
         zoom=10.5,
         opacity=1,
-        title="Prix moyen du m² réel par arrondissement (en €)",
+        title="Prix moyen du m² réel par quartier (en €)",
         height=400,
         custom_data=[paris_quartiers.l_qu, paris_quartiers_count_reel['prix_au_m2_reel_bati']]  # Ajoutez les données personnalisées ici
       )
