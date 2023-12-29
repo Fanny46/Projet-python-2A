@@ -51,35 +51,41 @@ def evolution_prix_mensuel(dvf):
     # Afficher le graphique interactif
     fig.show()
 
+"""Evolution du nombre d'appartements vendus, à une fréquence semestrielle ou mensuelle"""
+# from Visualisation import evolution_nombre
 
 def evolution_nombre(dvf, freq):
-    #dvf : dataframe avec une colonne date_mutation et prix
-    # freq = "Année" ou "Mois"
+    # dvf : dataframe avec une colonne date_mutation et prix
+    # freq = "Semestre" ou "Mois"
     
-    #ne garder que les colonnes utiles
+    # ne garder que les colonnes utiles
     dvf = dvf.loc[:,['date_mutation']]
     
-    #on met à jour la periode
+    # on met à jour la période
     period = ''
-    if freq == "Année":
-        period = "Y"
+    if freq == "Semestre":
+        period = "6M"
     elif freq == "Mois":
         period = "M"
 
-    #fréquence qui apparaîtra dans le titre du graphique 
+    # fréquence qui apparaîtra dans le titre du graphique 
     freq_titre = ''
-    if freq == "Année":
-        freq_titre = "annuelle"
+    if freq == "Semestre":
+        freq_titre = "semestrielle"
     elif freq == "Mois":
         freq_titre = "mensuelle"
 
-    #création d'une colonne au format date_time
+    # création d'une colonne au format date_time
     dvf['date_time'] = pd.to_datetime(dvf['date_mutation'])
 
-    # Convertir la colonne 'date_time' en format de périodes mensuelles ou annuelles
+    # Convertir la colonne 'date_time' en format de périodes mensuelles ou semestrielles
     dvf[freq] = dvf['date_time'].dt.to_period(period)
+
+    if freq == "Semestre":
+        semestres = pd.period_range(start=dvf[freq].min(), end=dvf[freq].max(), freq='6M')
+        dvf[freq] = pd.Categorical(dvf[freq], categories=semestres, ordered=True)
     
-    # Grouper par mois et calculer la moyenne des prix
+    # Grouper par fréquence et calculer la moyenne des prix
     dvf_grouped = dvf.groupby(freq).size().reset_index(name='nombre de ventes')
 
     # Convertir en str
@@ -108,8 +114,7 @@ def evolution_nombre(dvf, freq):
     fig.show()
 
 
-
-def carte_prix_moyen_arrodissement(dvf):
+def carte_prix_moyen_arrondissement(dvf):
     #dvf : geodataframe avec une colonne 'geometry'
 
     #on ne garde que les colonnes prix au m^2 et geometry
